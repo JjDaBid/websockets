@@ -111,8 +111,8 @@ h1 {
 .product-image {
     width: 100%;
     height: auto;
-    max-height: 150px; /* Ajusta este valor según tus necesidades */
-    object-fit: cover; /* Asegura que la imagen se recorte y llene el espacio disponible sin distorsionarse */
+    max-height: 150px;
+    object-fit: cover;
     border-radius: 5px;
     margin-bottom: 15px;
 }
