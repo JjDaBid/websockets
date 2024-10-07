@@ -4,8 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{title}}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+    <link href="/css/nav.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
     {{{body}}}
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo-container">
+                    <a href="/" class="logo">The Store</a>
+                </div>
+                <div class="menu-toggle" id="mobile-menu">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+                <ul class="nav-menu" id="menu-list">
+                    <li><a href="/">Inicio</a></li>
+                    <li>
+                        <a href="#">Categorías</a>
+                        <div class="dropdown">
+                            <a href="#">Lencería</a>
+                            <a href="#">Chaquetas</a>
+                            <a href="#">Joyería</a>
+                            <a href="#">Accesorios</a>
+                        </div>
+                    </li>
+                    <li><a href="/realtimeproducts" id="add-product-link">Agregar Producto</a></li>                 
+                </ul>
+                <div class="cart-ico-container">
+                    <a href="/cart">
+                        <img class="cart-ico" src="/img/carrito-de-compras.png" alt="Carrito de Compras">
+                        <span class="cart-count" id="cart-count" style="display: none;">0</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <footer>
+        <div class="footer-container">
+             <div class="logo-footer-container">
+                    <p class="logo-footer">The Store</p>
+                </div>
+            <p>&copy; 2024 David Pinzón. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+    <script src="/js/main.js"></script>
 </body>
 </html>

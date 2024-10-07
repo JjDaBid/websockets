@@ -1,83 +1,180 @@
 import { Router } from 'express';
-import { readProductsFromFile, writeProductsToFile } from '../utils/productUtils.js';
+import Product from '../models/product.js';
+import mongoose from 'mongoose';
 
 const viewsRouter = Router();
 
-// Ruta para la vista principal
 viewsRouter.get('/', (req, res) => {
-    const products = readProductsFromFile();
-    res.render('layouts/home', { products });
+  res.redirect('/page/1');
 });
 
-// Ruta para la vista de productos en tiempo real
+viewsRouter.get('/page/:page', async (req, res) => {
+  try {
+    const page = parseInt(req.params.page, 10) || 1;
+    const products = await Product.paginate({}, { page, limit: 20 });
+    res.status(200).render('layouts/home', { 
+      products: products.docs, 
+      pagination: {
+        page: products.page,
+        totalPages: products.totalPages,
+        hasPrevPage: products.hasPrevPage,
+        hasNextPage: products.hasNextPage,
+        prevPage: products.prevPage,
+        nextPage: products.nextPage
+      }
+    });
+  } catch (error) {
+    console.error('Error loading products:', error);
+    res.status(500).render('error', { message: 'Error al cargar los productos' });
+  }
+});
+
+viewsRouter.get('/product/:id', async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const foundProduct = await Product.findById(productId);
+    if (!foundProduct) {
+      return res.status(404).render('error', { message: 'Producto no encontrado' });
+    }
+    res.render('layouts/Product', { product: foundProduct });
+  } catch (error) {
+    console.error('Error loading product:', error);
+    res.status(500).json('error', { message: 'Error al cargar el producto' });
+  }
+});
+
 viewsRouter.get('/realtimeproducts', (req, res) => {
-    const products = readProductsFromFile();
-    let productToEdit = {};
-
-    if (req.query.id) {
-        const productId = parseInt(req.query.id);
-        productToEdit = products.find(product => product.id === productId) || {};
-    }
-
-    res.render('layouts/RealTimeProducts', { products, productToEdit });
+  res.redirect('/realtimeproducts/page/1');
 });
 
-// Ruta para la edición de un producto
-viewsRouter.get('/edit/:id', (req, res) => {
-    const products = readProductsFromFile();
-    const product = products.find(p => p.id === parseInt(req.params.id));
-    if (product) {
-        res.redirect(`/realtimeproducts?id=${product.id}`);
-    } else {
-        res.status(404).send('Producto no encontrado');
+viewsRouter.get(['/realtimeproducts', '/realtimeproducts/page/:page'], async (req, res) => {
+  try {
+    const page = parseInt(req.params.page, 10) || 1;
+    const products = await Product.paginate({}, { page, limit: 20 });
+    let productToEdit = {};
+    if (req.query.id) {
+      productToEdit = await Product.findById(req.query.id) || {};
     }
+    res.status(200).render('layouts/RealTimeProducts', {
+      products: products.docs,
+      pagination: {
+        page: products.page,
+        totalPages: products.totalPages,
+        hasPrevPage: products.hasPrevPage,
+        hasNextPage: products.hasNextPage,
+        prevPage: products.prevPage,
+        nextPage: products.nextPage
+      },
+      productToEdit
+    });
+  } catch (error) {
+    console.error('Error loading products:', error);
+    res.status(500).render('error', { message: 'Error al cargar los productos' });
+  }
 });
 
 // Ruta para agregar un producto
-viewsRouter.post('/addProduct', (req, res) => {
-  const { name, description, category, quantity, image } = req.body;
-  const products = readProductsFromFile();
-  const newProduct = {
-      id: products.length ? products[products.length - 1].id + 1 : 1,
-      name,
-      description,
-      category,
-      quantity: parseInt(quantity),
-      image
-  };
-  products.push(newProduct);
-  writeProductsToFile(products);
-  req.app.get('socketio').emit('productListUpdate', products);
-  res.json(newProduct);
+viewsRouter.post('/addProduct', async (req, res) => {
+  try {
+    const newProduct = await Product.create(req.body);
+    const products = await Product.paginate({}, { page: 1, limit: 20 });
+    req.app.get('socketio').emit('productListUpdate', products);
+    res.status(201).json(newProduct);
+  } catch (error) {
+    console.error('Error al crear el producto:', error);
+    res.status(500).json({ error: 'Error al crear el producto' });
+  }
 });
 
 // Ruta para actualizar un producto
-viewsRouter.post('/updateProduct', (req, res) => {
-    const { id, name, description, category, quantity, image } = req.body;
-    let products = readProductsFromFile();
-    const index = products.findIndex(p => p.id === parseInt(id));
-    if (index !== -1) {
-        products[index] = { ...products[index], name, description, category, quantity: parseInt(quantity), image };
-        writeProductsToFile(products);
-
-        req.app.get('socketio').emit('productListUpdate', products);
-        
-        res.json(products[index]);
-    } else {
-        res.status(404).json({ error: 'Product not found' });
+viewsRouter.put('/updateProduct/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'ID de producto inválido' });
     }
+    const updatedProduct = await Product.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updatedProduct) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+    const products = await Product.paginate({}, { page: 1, limit: 20 });
+    req.app.get('socketio').emit('productListUpdate', products);
+    res.json(updatedProduct);
+  } catch (error) {
+    console.error('Error al actualizar el producto:', error);
+    res.status(500).json({ error: 'Error al actualizar el producto' });
+  }
 });
 
-// Ruta para eliminar un producto
-viewsRouter.post('/deleteProduct', (req, res) => {
-    const { id } = req.body;
-    let products = readProductsFromFile();
-    products = products.filter(product => product.id !== parseInt(id));
-    writeProductsToFile(products);    
 
-    req.app.get('socketio').emit('productListUpdate', products);
-    
-    res.json({ success: true });
+// Ruta para eliminar un producto
+viewsRouter.delete('/deleteProduct/:id', async (req, res) => {
+  try {
+    const { id } = req.params;    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'ID de producto inválido' });
+    }
+    const deletedProduct = await Product.findByIdAndDelete(id);    
+    if (!deletedProduct) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+    const products = await Product.paginate({}, { page: 1, limit: 20 });
+    req.app.get('socketio').emit('productListUpdate', products);    
+    res.status(200).json({ success: true, message: 'Producto eliminado exitosamente' });
+  } catch (error) {
+    console.error('Error al eliminar el producto:', error);
+    res.status(500).json({ error: 'Error al eliminar el producto' });
+  }
+});
+
+
+viewsRouter.get('/cart', (req, res) => {
+  if (!req.session.cart) {
+    req.session.cart = [];    
+  }
+  let total = req.session.cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+  res.render('layouts/cart', { cart: req.session.cart, total: total });
+});
+
+viewsRouter.post('/cart/add', (req, res) => {
+  if (!req.session.cart) {
+    req.session.cart = [];    
+  }
+  const newProduct = req.body;
+  const existingProductIndex = req.session.cart.findIndex(item => item.id === newProduct.id);
+  
+  if (existingProductIndex > -1) {
+      req.session.cart[existingProductIndex].quantity += parseInt(newProduct.quantity);
+  } else {
+      req.session.cart.push({
+          ...newProduct,
+          quantity: parseInt(newProduct.quantity)
+      });
+  }  
+  res.status(200).json({ message: 'Producto agregado al carrito', cart: req.session.cart });
+});
+
+viewsRouter.post('/cart/update', (req, res) => {
+  if (!req.session.cart) {
+    req.session.cart = [];
+  }
+  const { id, quantity } = req.body;
+  const productIndex = req.session.cart.findIndex(item => item.id === id);
+  
+  if (productIndex > -1) {
+      req.session.cart[productIndex].quantity = parseInt(quantity);
+  }
+  
+  res.status(200).json({ message: 'Carrito actualizado', cart: req.session.cart });
+});
+
+viewsRouter.post('/cart/remove', (req, res) => {
+  if (!req.session.cart) {
+    req.session.cart = [];
+  }  
+  const { id } = req.body;
+  req.session.cart = req.session.cart.filter(item => item.id !== id);
+  res.status(200).json({ message: 'Producto eliminado del carrito', cart: req.session.cart });
 });
 
 export default viewsRouter;

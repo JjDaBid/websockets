@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Producto</title>    
+    <link href="/css/product.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <main>
+        <h1 class="page-title">Detalle del Producto</h1> 
+        <div div class="product-card" data-id="{{product._id}}" data-stock="{{product.stock}}">
+            <div class="product-image">
+                <span class="category-badge">{{product.category}}</span>
+                <img src="{{product.image}}" alt="{{product.title}}"/>
+            </div>
+            <div class="product-info">
+                <h2 class="product-title">{{product.title}}</h2>
+                <p class="product-description">{{product.description}}</p>    
+                <div class="stock-field">
+                    <p class="stock-label">Unidades disponibles:&nbsp;</p>
+                    <p class="product-stock"> {{product.stock}}</p>
+                </div> 
+                <div class="price-field">
+                    <p class="price-label">Precio: $ </p>
+                    <p class="product-price"> {{product.price}}</p>
+                </div>
+                <div class="quantity-control">
+                    <button class="quantity-btn" id="decrease-btn">-</button>
+                    <input type="number" id="quantity-input" value="1" min="1" />
+                    <button class="quantity-btn" id="increase-btn">+</button>
+                </div>
+                <button class="add-to-cart-btn">Agregar al Carrito</button>
+            </div>
+        </div>
+    </main>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/product.js"></script>
+</body>
+</html>

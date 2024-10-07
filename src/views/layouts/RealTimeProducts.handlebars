@@ -4,63 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos en Tiempo Real</title>    
+    <link href="/css/form.css" rel="stylesheet" type="text/css" />    
     <link href="/css/styles.css" rel="stylesheet" type="text/css" />    
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-
 </head>
-<body>
-    <header>
-        <nav class="navbar">
-            <ul class="nav-menu">
-                <li><a href="/" class="logo">The Store</a></li>
-                <li><a href="/">Inicio</a></li>
-                <li><a href="/realtimeproducts">Agregar Producto</a></li>
-            </ul>
-        </nav>
-    </header>
-    
+<body>        
     <main>
         <h1>Agregar/Editar Producto</h1>
-        <form id="product-form" class="form-container" action="/updateProduct" method="POST">
-            <input type="hidden" id="product-id" name="id" value="{{productToEdit.id}}">
-            <input type="text" id="product-name" name="name" placeholder="Nombre del producto" required value="{{productToEdit.name}}">
+        <form id="product-form" class="form-container">
+            <input type="hidden" id="product-id" name="id" value="{{productToEdit._id}}">
+            <input type="text" id="product-name" name="title" placeholder="Nombre del producto" required value="{{productToEdit.title}}">
             <input type="text" id="product-description" name="description" placeholder="Descripción" required value="{{productToEdit.description}}">
-            <div class="form-group">
-                <select id="product-category" name="category" required>
-                    <option value="">Selecciona una categoría</option>
-                    <option value="Consolas" {{#ifCond productToEdit.category '==' 'Consolas'}}selected{{/ifCond}}>Consolas</option>
-                    <option value="Laptops" {{#ifCond productToEdit.category '==' 'Laptops'}}selected{{/ifCond}}>Laptops</option>
-                    <option value="Monitores" {{#ifCond productToEdit.category '==' 'Monitores'}}selected{{/ifCond}}>Monitores</option>
-                    <option value="Desktops" {{#ifCond productToEdit.category '==' 'Desktops'}}selected{{/ifCond}}>Desktops</option>
-                    <option value="Camaras" {{#ifCond productToEdit.category '==' 'Camaras'}}selected{{/ifCond}}>Cámaras</option>
-                    <option value="Accesorios" {{#ifCond productToEdit.category '==' 'Accesorios'}}selected{{/ifCond}}>Accesorios</option>
-                </select>
-                <input type="number" id="product-quantity" name="quantity" placeholder="Cantidad" required value="{{productToEdit.quantity}}">
-            </div>
-            <input type="text" id="product-image" name="image" placeholder="URL de la imagen" value="{{productToEdit.image}}">
+            <select id="product-category" name="category" required>
+                <option value="">Selecciona una categoría</option> 
+                <option value="Joyería" {{#ifCond productToEdit.category '==' 'Chaquetas'}}selected{{/ifCond}}>Chaquetas</option>
+                <option value="Lencería" {{#ifCond productToEdit.category '==' 'Lencería'}}selected{{/ifCond}}>Lencería</option>
+                <option value="Joyería" {{#ifCond productToEdit.category '==' 'Joyería'}}selected{{/ifCond}}>Joyería</option>
+                <option value="Accesorios" {{#ifCond productToEdit.category '==' 'Accesorios'}}selected{{/ifCond}}>Accesorios</option>
+            </select>
+            <input type="number" id="product-quantity" name="stock" placeholder="Cantidad" required value="{{productToEdit.stock}}">
+            <input type="number" id="product-price" name="price" placeholder="Precio" required value="{{productToEdit.price}}">
+            <input type="text" id="product-image" name="image" placeholder="URL de la imagen" required value="{{productToEdit.image}}">
             <input type="submit" value="Guardar">
         </form>
 
-
-
-        <div id="product-list" class="product-list">
-            {{#each products}}
-                <div class="product-card">
-                    <img src="{{this.image}}" alt="Imagen de {{this.name}}" class="product-image">
-                    <h2>{{this.name}}</h2>
-                    <p><strong>ID:</strong> {{this.id}}</p>
-                    <p><strong>Descripción:</strong> {{this.description}}</p>
-                    <p><strong>Categoría:</strong> {{this.category}}</p>
-                    <p><strong>Cantidad:</strong> {{this.quantity}}</p>
-                    <div class="product-actions">
-                        <a href="/edit/{{this.id}}" class="button-link">Editar</a>
-                        <button onclick="deleteProduct({{this.id}})">Eliminar</button>
+        {{#if products.length}}
+            <div id="product-list" class="product-list">
+                {{#each products}}
+                    <div class="product-card">
+                        <figure class="figure">
+                            <span class="category-badge">{{this.category}}</span>
+                            <img
+                                src="{{this.image}}"
+                                alt="Imagen de {{this.title}}"
+                                class="product-image"
+                            />                            
+                        </figure>
+                         <div class="product-info">
+                            <div class="title-box">
+                                <p class="product-name">{{this.title}}</p>
+                            </div>
+                            <div class="specific-info">
+                                <div class="stock-box">
+                                    <p>{{this.stock }}</p>&nbsp;
+                                    <p>uds en stock</p>
+                                </div>
+                                <div class="price-box">
+                                    <p class="product-price">${{this.price}}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="product-actions">
+                            <button onclick="loadProductForEdit('{{this._id}}')" class="button-link">Editar</button>
+                            <button onclick="deleteProduct('{{this._id}}')">Eliminar</button>
+                            <a href="/product/{{this._id}}" class="button-link">Ver</a>
+                        </div>
                     </div>
-                </div>
-            {{/each}}
-        </div>        
+                {{/each}}
+            </div>
+        {{else}}
+            <p>No hay productos disponibles</p>
+        {{/if}} 
+        <div class="pagination-section">
+            {{#if pagination.hasPrevPage}}
+                <a id="prev-button" href="/realTimeProducts/page/{{pagination.prevPage}}" data-page="{{pagination.prevPage}}">Anterior</a>
+            {{/if}}
+            <input type="number" id="page-input" value="{{pagination.page}}" min="1" max="{{pagination.totalPages}}" style="width: 50px; text-align: center;" />
+            {{#if pagination.hasNextPage}}
+                <a id="next-button" href="/realTimeProducts/page/{{pagination.nextPage}}" data-page="{{pagination.nextPage}}">Siguiente</a>
+            {{/if}}
+        </div> 
     </main>
-
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/realTimeProducts.js"></script>    
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

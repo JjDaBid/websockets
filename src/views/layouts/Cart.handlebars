@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Carrito de Compras</title>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+        <link href="/css/cart.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </head>
+    <body> 
+        <main class="cart-main">
+        <h1 class="page-title">Carrito de Compras</h1>   
+        
+        <div class="cart-container">
+            {{#if cart.length}}
+                {{#each cart}}
+                <div class="cart-card" data-id="{{this.id}}" data-stock="{{this.stock}}">
+                    <img src="{{this.image}}" alt="{{this.title}}" class="product-image">
+                    <div class="product-details">
+                        <div class="title-box">
+                            <h2 class="product-title">{{this.title}}</h2>
+                            <p class="product-stock">{{this.stock}}</p>
+                        </div>     
+                        <div class="info-box">
+                            <div class="quantity-controls">
+                                <p class="quantity-label">Cantidad:</p>
+                                <div class="quantity-controls-box">
+                                    <button class="btn decrease-btn">-</button>
+                                    <span class="quantity">{{this.quantity}}</span>
+                                    <button class="btn increase-btn">+</button>
+                                </div>
+                            </div>
+                            <div class="price-box">
+                                <p class="price-label">Precio Unitario:</p>
+                                <p class="price" >{{this.price}}</p>
+                            </div>
+                            <div class="subtotal-box">
+                                <p class="subtotal-label">Subtotal:</p>
+                                <p class="subtotal">{{multiply this.quantity this.price}}</p>
+                            </div>
+                        </div>
+                        <div class="btn-box">
+                            <button class="remove-btn">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+                {{/each}}        
+            {{else}}
+                <p class="empty-cart-message">El carrito está vacío.</p>
+            {{/if}}
+        </div>
+
+        {{#if cart.length}}
+        <div class="total-container">
+            <h2>Total de la Compra: <span class="cart-total">{{total}}</span></h2>
+            <button class="pay-button" id="payButton">Pagar</button>
+        </div>
+        {{/if}}   
+        </main>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/js/cart.js"></script>    
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>   
+    </body>
+</html>
