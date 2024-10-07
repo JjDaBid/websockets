@@ -43,9 +43,9 @@ function updatePaginationControls(products) {
   if (!paginationSection) return;
 
   paginationSection.innerHTML = `
-      ${products.hasPrevPage ? `<a id="prev-button" href="/realTimeProducts/page/${products.prevPage}" data-page="${products.prevPage}">Anterior</a>` : ''}
+      ${products.hasPrevPage ? `<a id="prev-button" href="/page/${products.prevPage}" data-page="${products.prevPage}">Anterior</a>` : ''}
       <input type="number" id="page-input" value="${products.page}" min="1" max="${products.totalPages}" style="width: 50px; text-align: center;" />
-      ${products.hasNextPage ? `<a id="next-button" href="/realTimeProducts/page/${products.nextPage}" data-page="${products.nextPage}">Siguiente</a>` : ''}
+      ${products.hasNextPage ? `<a id="next-button" href="/page/${products.nextPage}" data-page="${products.nextPage}">Siguiente</a>` : ''}
   `;
 
   attachPaginationEventListeners(products.totalPages);
@@ -74,7 +74,7 @@ function attachPaginationEventListeners(totalPages) {
           page = 1;
         }  
         socket.emit('requestProductList', page);
-        window.history.pushState({}, '', `/realTimeProducts/page/${page}`);
+        window.history.pushState({}, '', `/page/${page}`);
       }
     });
   
@@ -95,7 +95,7 @@ function handlePaginationClick(e) {
   const page = this.getAttribute('data-page');
   if (page) {
       socket.emit('requestProductList', parseInt(page));
-      window.history.pushState({}, '', `/realTimeProducts/page/${page}`);
+      window.history.pushState({}, '', `/page/${page}`);
   }
 }
 

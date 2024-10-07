@@ -25,8 +25,9 @@
             <input type="number" id="product-quantity" name="stock" placeholder="Cantidad" required value="{{productToEdit.stock}}">
             <input type="number" id="product-price" name="price" placeholder="Precio" required value="{{productToEdit.price}}">
             <input type="text" id="product-image" name="image" placeholder="URL de la imagen" required value="{{productToEdit.image}}">
-            <input type="submit" value="Guardar">
+            <input type="submit" id="save-button" value="Guardar">
         </form>
+        
 
         {{#if products.length}}
             <div id="product-list" class="product-list">

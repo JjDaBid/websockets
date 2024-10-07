@@ -53,8 +53,10 @@ router.post('/update', (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-      const carts = await Cart.find();
+      const carts = await Cart.find().populate('items.product');
+      console.log('populate is working perfectly')
       res.status(200).json(carts);
+      console.log(JSON.stringify(carts, null, 2));
   } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Error al obtener los carritos" });
@@ -63,27 +65,48 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   const { items } = req.body;
+  const { productId } = req.body;
   if (!items || items.length === 0) {
       return res.status(400).json({ error: 'El carrito debe contener al menos un producto' });
   }
   try {
-      const newCart = new Cart({ items });
-      await newCart.save();
+      const newCart = await Cart.create({ items });
       res.status(201).json({ message: 'Carrito creado exitosamente', cart: newCart });
   } catch (error) {
+      console.error(error);
       res.status(500).json({ error: 'Error al crear el carrito' });
+  }
+});
+
+router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  const { productId } = req.body;
+  if (!productId) {
+    return res.status(400).json({ error: 'El ID del producto es obligatorio' });
+  }
+
+  try {
+    const cart = await Cart.findById(id);
+
+    if (!cart) {
+      return res.status(404).json({ error: 'Carrito no encontrado' });
+    }
+    cart.items.push({ product: productId });
+    await cart.updateOne(productId, cart);
+    res.status(200).json({ message: 'Producto agregado al carrito', cart: updatedCart });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al agregar el producto al carrito' });
   }
 });
 
 router.get('/:id', async(req, res) => {  
   try {
     const { id } = req.params; 
-    const cart = await Cart.findById(id).populate('items.product');
+    const cart = await Cart.findOne({_id:id}).populate('items.product');
     if (!cart) {
       return res.status(404).json({ error: "Carrito no encontrado" });
     }
-    // Verifica si el populate funcionó
-    console.log(JSON.stringify(cart, null, 2));
     res.status(200).json(cart);
   } catch (error) {
     console.error(error);

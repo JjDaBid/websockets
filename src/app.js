@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import mongoose from 'mongoose';
 import session from 'express-session';
+import sharedSession from 'socket.io-express-session';
 import MongoStore from 'connect-mongo';
 import viewsRouter from './routes/views.router.js';
 import productsRouter from './routes/productsRouter.js';
@@ -62,15 +63,22 @@ app.use(express.static(join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(session({
+
+const sessionMiddleware = session({
   store: MongoStore.create({
     mongoUrl: 'mongodb+srv://dabid:ABC12345*@coder1.ccr7l.mongodb.net/thestore?retryWrites=true&w=majority&appName=Coder1',
-    ttl: 14 * 24 * 60 * 60
+    ttl: 14 * 24 * 60 * 60 // 14 días
   }),
   secret: 'your-secret-key',
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 14 * 24 * 60 * 60 * 1000 }
+  cookie: { maxAge: 14 * 24 * 60 * 60 * 1000 } // 14 días en milisegundos
+});
+
+app.use(sessionMiddleware);
+
+io.use(sharedSession(sessionMiddleware, {
+  autoSave: true // Opcional: guarda automáticamente las sesiones después de cada interacción
 }));
 
 io.on('connection', (socket) => {

@@ -23,6 +23,44 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.get('/productsByCategory/:category', async (req, res) => {
+  try {
+    const { page = 1, limit = 20 } = req.query;
+    const { category } = req.params;
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const products = await Product.aggregate([
+      {
+        $match: { category: category }
+      },
+      {
+        $skip: (pageNum - 1) * limitNum
+      },
+      {
+        $limit: limitNum
+      }
+    ]);
+    const totalProducts = await Product.countDocuments({ category: category });
+    const totalPages = Math.ceil(totalProducts / limitNum);
+    const result = {
+      payload: products,
+      currentPage: pageNum,
+      totalPages: totalPages,
+      hasNextPage: pageNum < totalPages,
+      hasPrevPage: pageNum > 1,
+      nextPage: pageNum < totalPages ? pageNum + 1 : null,
+      prevPage: pageNum > 1 ? pageNum - 1 : null,
+      nextLink: pageNum < totalPages ? `/api/productsByCategory/${category}?page=${pageNum + 1}&limit=${limitNum}` : null,
+      prevLink: pageNum > 1 ? `/api/productsByCategory/${category}?page=${pageNum - 1}&limit=${limitNum}` : null
+    };
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener los productos' });
+  }
+});
+
+
 // Ruta para obtener un producto específico
 router.get('/:id', async (req, res) => {  
   try {
@@ -77,6 +115,5 @@ router.delete('/:id', async (req, res) => {
       res.status(500).json({ error: 'Error al eliminar el producto' });
   }
 });
-
 
 export default router;
