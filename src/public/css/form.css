@@ -144,6 +144,6 @@ button:hover {
     }
     
     .filter-group {
-        flex: 1 1 100%; /* Cada grupo ocupa el 100% del ancho */
+        flex: 1 1 100%;
     }
 }

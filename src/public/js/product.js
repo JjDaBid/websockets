@@ -75,7 +75,6 @@ document.addEventListener("DOMContentLoaded", function () {
               title: 'Éxito',
               text: 'Producto agregado al carrito',
           });
-          // Disparar evento para actualizar el contador del carrito
           document.dispatchEvent(new CustomEvent('cartUpdated', { 
               detail: { action: 'add', productId: productId, quantity: quantity }
           }));

@@ -5,7 +5,6 @@ mobileMenu.addEventListener("click", () => {
     menuList.classList.toggle("active");
 });
 
-// Función para actualizar el contador de productos en el carrito
 function updateCartCount() {
     const cartCountElement = document.getElementById('cart-count');
     const cartCount = getCartTotalQuantity();
@@ -17,13 +16,11 @@ function updateCartCount() {
     }
 }
 
-// Función para obtener la cantidad total de productos en el carrito
 function getCartTotalQuantity() {
     const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
     return cartItems.reduce((total, item) => total + item.quantity, 0);
 }
 
-// Función para agregar productos al carrito
 function addToCart(productId, quantity) {
     let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
     const existingItem = cartItems.find(item => item.id === productId);
@@ -36,7 +33,6 @@ function addToCart(productId, quantity) {
     updateCartCount();
 }
 
-// Función para remover productos del carrito
 function removeFromCart(productId, quantity) {
     let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
     const itemIndex = cartItems.findIndex(item => item.id === productId);

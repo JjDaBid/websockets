@@ -113,14 +113,12 @@ productForm.addEventListener('submit', async (e) => {
   try {
     let response;
     if (productId) {
-      // Actualizar producto existente
       response = await fetch(`/updateProduct/${productId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(productData)
       });
     } else {
-      // Crear nuevo producto
       response = await fetch('/addProduct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -228,7 +226,6 @@ function applyFilters() {
   requestProductList();
 }
 
-// Inicialización
 document.addEventListener('DOMContentLoaded', () => {
   const path = window.location.pathname;
   const pathParts = path.split('/');

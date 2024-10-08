@@ -9,7 +9,33 @@
 </head>
 <body>   
     <main>
-        <h1>Productos</h1>  
+        <h1>Productos</h1>
+
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="filter-category">Categoría:</label>
+                <select id="filter-category">
+                    <option value="">Todas</option>
+                    <option value="Joyería">Joyería</option>
+                    <option value="Lencería">Lencería</option>
+                    <option value="Chaquetas">Chaquetas</option>
+                    <option value="Accesorios">Accesorios</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-price">Precio máximo:</label>
+                <input type="number" id="filter-price" placeholder="Ej. 100">
+            </div>
+            <div class="filter-group">
+                <label for="sort-order">Ordenar por precio:</label>
+                <select id="sort-order">
+                    <option value="">Sin ordenar</option>
+                    <option value="asc">Menor a mayor</option>
+                    <option value="desc">Mayor a menor</option>
+                </select>
+            </div>
+        </div>
+
         {{#if products.length}}
             <div id="product-list" class="product-list">
                 {{#each products}}                    

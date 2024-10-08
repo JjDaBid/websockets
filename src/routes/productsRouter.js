@@ -60,8 +60,6 @@ router.get('/productsByCategory/:category', async (req, res) => {
   }
 });
 
-
-// Ruta para obtener un producto específico
 router.get('/:id', async (req, res) => {  
   try {
       const productDetails = await Product.findById(req.params.id);
@@ -98,7 +96,6 @@ router.put('/:id', async (req, res) => {
       res.status(500).json({ error: 'Error al actualizar el producto' });
   }
 });
-
 
 router.delete('/:id', async (req, res) => {
   try {

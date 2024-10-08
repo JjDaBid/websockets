@@ -177,7 +177,6 @@ document.addEventListener('DOMContentLoaded', function() {
           if (totalContainer) {
               totalContainer.style.display = 'none';
           }
-          // Resetear el contador del carrito
           document.dispatchEvent(new CustomEvent('cartUpdated', { 
               detail: { action: 'clear' }
           }));
