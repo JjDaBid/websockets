@@ -41,16 +41,17 @@
             </div>
         {{else}}
             <p>No hay productos disponibles</p>
-        {{/if}}        
+            <p>Home</p>
+        {{/if}}          
         <div class="pagination-section">
             {{#if pagination.hasPrevPage}}
-                <a id="prev-button" href="/page/{{pagination.prevPage}}" data-page="{{pagination.prevPage}}">Anterior</a>
+                <a id="prev-button" href="{{#if category}}/{{category}}{{/if}}/page/{{pagination.prevPage}}" data-page="{{pagination.prevPage}}">Anterior</a>
             {{/if}}
             <input type="number" id="page-input" value="{{pagination.page}}" min="1" max="{{pagination.totalPages}}" style="width: 50px; text-align: center;" />
             {{#if pagination.hasNextPage}}
-                <a id="next-button" href="/page/{{pagination.nextPage}}" data-page="{{pagination.nextPage}}">Siguiente</a>
+                <a id="next-button" href="{{#if category}}/{{category}}{{/if}}/page/{{pagination.nextPage}}" data-page="{{pagination.nextPage}}">Siguiente</a>
             {{/if}}
-        </div>     
+        </div>
     </main>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/home.js"></script>

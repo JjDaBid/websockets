@@ -63,7 +63,6 @@ app.use(express.static(join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 const sessionMiddleware = session({
   store: MongoStore.create({
     mongoUrl: 'mongodb+srv://dabid:ABC12345*@coder1.ccr7l.mongodb.net/thestore?retryWrites=true&w=majority&appName=Coder1',
@@ -72,29 +71,43 @@ const sessionMiddleware = session({
   secret: 'your-secret-key',
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 14 * 24 * 60 * 60 * 1000 } // 14 días en milisegundos
+  cookie: { maxAge: 14 * 24 * 60 * 60 * 1000 }
 });
 
 app.use(sessionMiddleware);
 
 io.use(sharedSession(sessionMiddleware, {
-  autoSave: true // Opcional: guarda automáticamente las sesiones después de cada interacción
+  autoSave: true
 }));
 
 io.on('connection', (socket) => {
-  console.log('A user connected');
-
-  socket.on('requestProductList', async (page = 1) => {
+  socket.on('requestProductList', async ({ page, category, maxPrice, sortOrder }) => {
     try {
-      const products = await Product.paginate({}, { page, limit: 20 });
+      let query = {};
+      if (category) {
+        query.category = category;
+      }
+      if (maxPrice) {
+        query.price = { $lte: parseFloat(maxPrice) };
+      }
+
+      let sort = {};
+      if (sortOrder === 'asc') {
+        sort = { price: 1 };
+      } else if (sortOrder === 'desc') {
+        sort = { price: -1 };
+      }
+
+      const products = await Product.paginate(query, { 
+        page, 
+        limit: 20,
+        sort: sort
+      });
+
       socket.emit('productListUpdate', products);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error('Error loading products:', error);
     }
-  });
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
   });
 });
 
@@ -111,11 +124,5 @@ mongoose.connect('mongodb+srv://dabid:ABC12345*@coder1.ccr7l.mongodb.net/thestor
 server.listen(PORT, () => {
     console.log(`Listening on Port ${PORT}`);
 });
-
-
-
-
-
-
 
 export default app;

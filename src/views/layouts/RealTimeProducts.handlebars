@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 <body>        
-    <main>
+    <main class="main">
         <h1>Agregar/Editar Producto</h1>
         <form id="product-form" class="form-container">
             <input type="hidden" id="product-id" name="id" value="{{productToEdit._id}}">
@@ -17,7 +17,7 @@
             <input type="text" id="product-description" name="description" placeholder="Descripción" required value="{{productToEdit.description}}">
             <select id="product-category" name="category" required>
                 <option value="">Selecciona una categoría</option> 
-                <option value="Joyería" {{#ifCond productToEdit.category '==' 'Chaquetas'}}selected{{/ifCond}}>Chaquetas</option>
+                <option value="Chaquetas" {{#ifCond productToEdit.category '==' 'Chaquetas'}}selected{{/ifCond}}>Chaquetas</option>
                 <option value="Lencería" {{#ifCond productToEdit.category '==' 'Lencería'}}selected{{/ifCond}}>Lencería</option>
                 <option value="Joyería" {{#ifCond productToEdit.category '==' 'Joyería'}}selected{{/ifCond}}>Joyería</option>
                 <option value="Accesorios" {{#ifCond productToEdit.category '==' 'Accesorios'}}selected{{/ifCond}}>Accesorios</option>
@@ -28,6 +28,31 @@
             <input type="submit" id="save-button" value="Guardar">
         </form>
         
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="filter-category">Categoría:</label>
+                <select id="filter-category">
+                    <option value="">Todas</option>
+                    <option value="Joyería">Joyería</option>
+                    <option value="Lencería">Lencería</option>
+                    <option value="Chaquetas">Chaquetas</option>
+                    <option value="Accesorios">Accesorios</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-price">Precio máximo:</label>
+                <input type="number" id="filter-price" placeholder="Ej. 100">
+            </div>
+            <div class="filter-group">
+                <label for="sort-order">Ordenar por precio:</label>
+                <select id="sort-order">
+                    <option value="">Sin ordenar</option>
+                    <option value="asc">Menor a mayor</option>
+                    <option value="desc">Mayor a menor</option>
+                </select>
+            </div>
+            {{!-- <button class="filter-button" onclick="applyFilters()">Filtrar</button> --}}
+        </div>
 
         {{#if products.length}}
             <div id="product-list" class="product-list">
@@ -56,23 +81,24 @@
                             </div>
                         </div>
                         <div class="product-actions">
-                            <button onclick="loadProductForEdit('{{this._id}}')" class="button-link">Editar</button>
-                            <button onclick="deleteProduct('{{this._id}}')">Eliminar</button>
-                            <a href="/product/{{this._id}}" class="button-link">Ver</a>
+                            <button id="edit-button" onclick="loadProductForEdit('{{this._id}}')" class="button-link">Editar</button>
+                            <button id="delete-button" onclick="deleteProduct('{{this._id}}')">Eliminar</button>
+                            <a id="view-product-button" href="/product/{{this._id}}" class="button-link">Ver</a>
                         </div>
                     </div>
                 {{/each}}
             </div>
         {{else}}
             <p>No hay productos disponibles</p>
+            <p>realTimeProducts</p>
         {{/if}} 
         <div class="pagination-section">
             {{#if pagination.hasPrevPage}}
-                <a id="prev-button" href="/realTimeProducts/page/{{pagination.prevPage}}" data-page="{{pagination.prevPage}}">Anterior</a>
+                <a id="prev-button" href="{{#if category}}/{{category}}{{/if}}/page/{{pagination.prevPage}}" data-page="{{pagination.prevPage}}">Anterior</a>
             {{/if}}
             <input type="number" id="page-input" value="{{pagination.page}}" min="1" max="{{pagination.totalPages}}" style="width: 50px; text-align: center;" />
             {{#if pagination.hasNextPage}}
-                <a id="next-button" href="/realTimeProducts/page/{{pagination.nextPage}}" data-page="{{pagination.nextPage}}">Siguiente</a>
+                 <a id="next-button" href="{{#if category}}/{{category}}{{/if}}/page/{{pagination.nextPage}}" data-page="{{pagination.nextPage}}">Siguiente</a>
             {{/if}}
         </div> 
     </main>

@@ -6,6 +6,7 @@ const viewsRouter = Router();
 
 viewsRouter.get('/', (req, res) => {
   res.redirect('/page/1');
+  console.log("entra a /home ")
 });
 
 viewsRouter.get('/page/:page', async (req, res) => {
@@ -23,9 +24,33 @@ viewsRouter.get('/page/:page', async (req, res) => {
         nextPage: products.nextPage
       }
     });
+    console.log("redirigido a home paginado")
   } catch (error) {
     console.error('Error loading products:', error);
     res.status(500).render('error', { message: 'Error al cargar los productos' });
+  }
+});
+
+viewsRouter.get('/:category/page/:page', async (req, res) => {
+  try {
+    const category = req.params.category;
+    const page = parseInt(req.params.page, 10) || 1;
+    const products = await Product.paginate({ category }, { page, limit: 20 });
+    res.status(200).render('layouts/home', { 
+      products: products.docs, 
+      category: category,
+      pagination: {
+        page: products.page,
+        totalPages: products.totalPages,
+        hasPrevPage: products.hasPrevPage,
+        hasNextPage: products.hasNextPage,
+        prevPage: products.prevPage,
+        nextPage: products.nextPage
+      }
+    });
+  } catch (error) {
+    console.error('Error loading products by category:', error);
+    res.status(500).render('error', { message: 'Error al cargar los productos por categoría' });
   }
 });
 
@@ -43,18 +68,54 @@ viewsRouter.get('/product/:id', async (req, res) => {
   }
 });
 
-viewsRouter.get('/realtimeproducts', (req, res) => {
-  res.redirect('/realtimeproducts/page/1');
+// viewsRouter.get('/realtimeproducts', (req, res) => {
+//   console.log("entra a realtimeproducts")
+//   res.redirect('/realtimeproducts/page/1');  
+// });
+
+viewsRouter.get('/realtimeproducts', async (req, res) => {
+  try {
+    const products = await Product.find({})
+    res.render('layouts/RealTimeProducts', { products });
+  } catch (error) {
+    res.status(500).render('error', { message: 'Error al cargar los productos' });
+  }  
 });
 
-viewsRouter.get(['/realtimeproducts', '/realtimeproducts/page/:page'], async (req, res) => {
+viewsRouter.get('/realtimeproducts/page/:page', async (req, res) => {
   try {
+    console.log("redirigido a realtimeproducts")
     const page = parseInt(req.params.page, 10) || 1;
-    const products = await Product.paginate({}, { page, limit: 20 });
+    const category = req.query.category || '';
+    const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice) : undefined;
+    const sortOrder = req.query.sortOrder || '';
+
+    let query = {};
+    if (category) {
+      query.category = category;
+    }
+    if (maxPrice) {
+      query.price = { $lte: maxPrice };
+    }
+
+    let sort = {};
+    if (sortOrder === 'asc') {
+      sort = { price: 1 };
+    } else if (sortOrder === 'desc') {
+      sort = { price: -1 };
+    }
+
+    const products = await Product.paginate(query, { 
+      page, 
+      limit: 20,
+      sort: sort
+    });
+
     let productToEdit = {};
     if (req.query.id) {
       productToEdit = await Product.findById(req.query.id) || {};
     }
+
     res.status(200).render('layouts/RealTimeProducts', {
       products: products.docs,
       pagination: {
@@ -65,7 +126,12 @@ viewsRouter.get(['/realtimeproducts', '/realtimeproducts/page/:page'], async (re
         prevPage: products.prevPage,
         nextPage: products.nextPage
       },
-      productToEdit
+      productToEdit,
+      filters: {
+        category,
+        maxPrice,
+        sortOrder
+      }
     });
   } catch (error) {
     console.error('Error loading products:', error);
@@ -73,7 +139,6 @@ viewsRouter.get(['/realtimeproducts', '/realtimeproducts/page/:page'], async (re
   }
 });
 
-// Ruta para agregar un producto
 viewsRouter.post('/addProduct', async (req, res) => {
   try {
     const newProduct = await Product.create(req.body);
