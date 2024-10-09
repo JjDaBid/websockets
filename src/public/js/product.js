@@ -88,6 +88,16 @@ document.addEventListener("DOMContentLoaded", function () {
           });
       });
   });
+
+  const continueBuyingButton = document.getElementById('continue-buying-button');    
+    if (continueBuyingButton) {
+        continueBuyingButton.addEventListener('click', function() {
+            window.location.href = '/';
+        });
+    }
+
+
+
 });
 
 

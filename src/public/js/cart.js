@@ -52,6 +52,9 @@ document.addEventListener('DOMContentLoaded', function() {
           const price = parseFloat(cartCard.querySelector('.price').textContent);
           const subtotalElement = cartCard.querySelector('.subtotal');
           const subtotal = quantity * price;
+          subtotalElement.innerHTML = `
+            <p class="subtotal">${subtotal.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>          
+          `
           subtotalElement.textContent = `${subtotal}`;
 
           updateCartTotal();
@@ -94,7 +97,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const cartTotalElement = document.querySelector('.cart-total');
     if (cartTotalElement) {
-        cartTotalElement.textContent = `${total}`;
+      cartTotalElement.innerHTML = `
+        <span class="cart-total">${total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>      
+      `
     } else {
         console.error('No se pudo encontrar el elemento .cart-total');
     }
@@ -112,6 +117,13 @@ document.addEventListener('DOMContentLoaded', function() {
         totalContainer.style.display = 'block';
     }
 }
+
+const continueBuyingButton = document.getElementById('continue-buying-button');    
+    if (continueBuyingButton) {
+        continueBuyingButton.addEventListener('click', function() {
+            window.location.href = '/';
+        });
+    }
 
   const payButton = document.getElementById('payButton');
   if (payButton) {
