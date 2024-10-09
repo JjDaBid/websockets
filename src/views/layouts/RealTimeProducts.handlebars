@@ -10,24 +10,26 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 <body>        
-    <main class="main">
-        <h1>Agregar/Editar Producto</h1>
-        <form id="product-form" class="form-container">
-            <input type="hidden" id="product-id" name="id" value="{{productToEdit._id}}">
-            <input type="text" id="product-name" name="title" placeholder="Nombre del producto" required value="{{productToEdit.title}}">
-            <input type="text" id="product-description" name="description" placeholder="Descripción" required value="{{productToEdit.description}}">
-            <select id="product-category" name="category" required>
-                <option value="">Selecciona una categoría</option> 
-                <option value="Chaquetas" {{#ifCond productToEdit.category '==' 'Chaquetas'}}selected{{/ifCond}}>Chaquetas</option>
-                <option value="Lencería" {{#ifCond productToEdit.category '==' 'Lencería'}}selected{{/ifCond}}>Lencería</option>
-                <option value="Joyería" {{#ifCond productToEdit.category '==' 'Joyería'}}selected{{/ifCond}}>Joyería</option>
-                <option value="Accesorios" {{#ifCond productToEdit.category '==' 'Accesorios'}}selected{{/ifCond}}>Accesorios</option>
-            </select>
-            <input type="number" id="product-quantity" name="stock" placeholder="Cantidad" required value="{{productToEdit.stock}}">
-            <input type="number" id="product-price" name="price" placeholder="Precio" required value="{{productToEdit.price}}">
-            <input type="text" id="product-image" name="image" placeholder="URL de la imagen" required value="{{productToEdit.image}}">
-            <input type="submit" id="save-button" value="Guardar">
-        </form>
+    <main class="main">        
+        <div class="form-main-container">
+            <h1>Formulario de Producto</h1>  
+                <form id="product-form" class="form-container">
+                <input type="hidden" id="product-id" name="id" value="{{productToEdit._id}}">
+                <input type="text" id="product-name" name="title" placeholder="Nombre del producto" required value="{{productToEdit.title}}">
+                <input type="text" id="product-description" name="description" placeholder="Descripción" required value="{{productToEdit.description}}">
+                <select id="product-category" name="category" required>
+                    <option value="">Selecciona una categoría</option> 
+                    <option value="Chaquetas" {{#ifCond productToEdit.category '==' 'Chaquetas'}}selected{{/ifCond}}>Chaquetas</option>
+                    <option value="Lencería" {{#ifCond productToEdit.category '==' 'Lencería'}}selected{{/ifCond}}>Lencería</option>
+                    <option value="Joyería" {{#ifCond productToEdit.category '==' 'Joyería'}}selected{{/ifCond}}>Joyería</option>
+                    <option value="Accesorios" {{#ifCond productToEdit.category '==' 'Accesorios'}}selected{{/ifCond}}>Accesorios</option>
+                </select>
+                <input type="number" id="product-quantity" name="stock" placeholder="Cantidad" required value="{{productToEdit.stock}}">
+                <input type="number" id="product-price" name="price" placeholder="Precio" required value="{{productToEdit.price}}">
+                <input type="text" id="product-image" name="image" placeholder="URL de la imagen" required value="{{productToEdit.image}}">
+                <input type="submit" id="save-button" value="Guardar">
+            </form>
+        </div>
         
         <div class="filter-section">
             <div class="filter-group">
