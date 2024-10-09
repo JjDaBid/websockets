@@ -29,7 +29,7 @@ function updateProductList(products) {
             <p>uds en stock</p>
           </div>
           <div class="price-box">
-            <p class="product-price">$${product.price}</p>
+            <p class="product-price">${product.price.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
           </div>
         </div>
       </div>
