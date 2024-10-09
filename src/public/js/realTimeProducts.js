@@ -52,7 +52,6 @@ function updatePaginationControls(products) {
     <input type="number" id="page-input" value="${products.page}" min="1" max="${products.totalPages}" style="width: 50px; text-align: center;" />
     ${products.hasNextPage ? `<a id="next-button" href="${basePath}${products.nextPage}" data-page="${products.nextPage}">Siguiente</a>` : ''}
   `;
-
   attachPaginationEventListeners(products.totalPages);
 }
 
@@ -96,7 +95,7 @@ function navigateToPage(inputPage, totalPages) {
 }
 
 function requestProductList() {
-  socket.emit('requestProductList', { 
+  socket.emit('requestFilteredProducts', { 
     page: currentPage, 
     category: currentCategory,
     maxPrice: currentMaxPrice,
@@ -167,6 +166,7 @@ async function loadProductForEdit(productId) {
       document.getElementById('product-quantity').value = product.stock;
       document.getElementById('product-price').value = product.price;
       document.getElementById('product-image').value = product.image;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       throw new Error('Error al cargar el producto');
     }
@@ -184,38 +184,49 @@ async function loadProductForEdit(productId) {
 }
 
 async function deleteProduct(productId) {
-  if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-    try {
-      const response = await fetch(`/deleteProduct/${productId}`, {
-        method: 'DELETE'
-      });
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: "¡No podrás revertir esta acción!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/deleteProduct/${productId}`, {
+          method: 'DELETE'
+        });
 
-      if (response.ok) {
+        if (response.ok) {
+          Toastify({
+            text: "Producto eliminado con éxito",
+            duration: 3000,
+            close: true,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+          }).showToast();
+
+          requestProductList();
+        } else {
+          throw new Error('Error al eliminar el producto');
+        }
+      } catch (error) {
+        console.error('Error:', error);
         Toastify({
-          text: "Producto eliminado con éxito",
+          text: "Error al eliminar el producto",
           duration: 3000,
           close: true,
           gravity: "top",
           position: "right",
-          backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+          backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
         }).showToast();
-
-        requestProductList();
-      } else {
-        throw new Error('Error al eliminar el producto');
       }
-    } catch (error) {
-      console.error('Error:', error);
-      Toastify({
-        text: "Error al eliminar el producto",
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
-      }).showToast();
     }
-  }
+  });
 }
 
 function applyFilters() {

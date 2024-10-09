@@ -1,5 +1,7 @@
 const socket = io();
 
+const productList = document.getElementById('product-list');
+const paginationSection = document.querySelector('.pagination-section');
 let currentPage = 1;
 let currentCategory = '';
 let currentMaxPrice = '';
@@ -11,11 +13,15 @@ socket.on('productListUpdate', (updatedProducts) => {
 });
 
 function updateProductList(products) {
-  const productList = document.getElementById('product-list');
   if (!productList) return;
 
-  productList.innerHTML = products.map(product => `
-    <div class="product-card" data-id="${product._id}">
+  productList.innerHTML = '';
+
+  products.forEach(product => {
+    const productCard = document.createElement('div');
+    productCard.className = 'product-card';
+    productCard.setAttribute('data-id', product._id);
+    productCard.innerHTML = `
       <figure class="figure">
         <span class="category-badge">${product.category}</span>
         <img src="${product.image}" alt="Imagen de ${product.title}" class="product-image" />
@@ -34,21 +40,28 @@ function updateProductList(products) {
           </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+    productList.appendChild(productCard);
+  });
+
+  if (products.length === 0) {
+    const noProductsMessage = document.createElement('p');
+    noProductsMessage.textContent = 'No hay productos disponibles';
+    productList.appendChild(noProductsMessage);
+  }
 }
 
 function updatePaginationControls(products) {
-  const paginationSection = document.querySelector('.pagination-section');
   if (!paginationSection) return;
 
-  const basePath = currentCategory ? `/${currentCategory}/page/` : '/page/';
+  const basePath = currentCategory ? `/realtimeproducts/${currentCategory}/page/` : '/realtimeproducts/page/';
 
   paginationSection.innerHTML = `
     ${products.hasPrevPage ? `<a id="prev-button" href="${basePath}${products.prevPage}" data-page="${products.prevPage}">Anterior</a>` : ''}
     <input type="number" id="page-input" value="${products.page}" min="1" max="${products.totalPages}" style="width: 50px; text-align: center;" />
     ${products.hasNextPage ? `<a id="next-button" href="${basePath}${products.nextPage}" data-page="${products.nextPage}">Siguiente</a>` : ''}
   `;
+
   attachPaginationEventListeners(products.totalPages);
 }
 
@@ -58,11 +71,11 @@ function attachPaginationEventListeners(totalPages) {
   const pageInput = document.getElementById("page-input");
 
   if (prevButton) {
-    prevButton.addEventListener("click", handlePaginationClick);
+    prevButton.addEventListener("click", (e) => handlePaginationClick(e, prevButton.getAttribute('data-page')));
   }
 
   if (nextButton) {
-    nextButton.addEventListener("click", handlePaginationClick);
+    nextButton.addEventListener("click", (e) => handlePaginationClick(e, nextButton.getAttribute('data-page')));
   }
 
   if (pageInput) {
@@ -71,24 +84,19 @@ function attachPaginationEventListeners(totalPages) {
         navigateToPage(pageInput.value, totalPages);
       }
     });
-
-    pageInput.addEventListener("change", (e) => {
-      let page = parseInt(e.target.value);
-      if (page > totalPages) {
-        page = totalPages;
-      } else if (page < 1) {
-        page = 1;
-      }
-      e.target.value = page;
-    });
   }
+}
+
+function handlePaginationClick(e, page) {
+  e.preventDefault();
+  navigateToPage(page);
 }
 
 function navigateToPage(inputPage, totalPages) {
   let page = parseInt(inputPage);
   if (isNaN(page) || page < 1) {
     page = 1;
-  } else if (page > totalPages) {
+  } else if (totalPages && page > totalPages) {
     page = totalPages;
   }
   
@@ -96,12 +104,13 @@ function navigateToPage(inputPage, totalPages) {
   requestProductList();
 }
 
-function handlePaginationClick(e) {
-  e.preventDefault();
-  const page = this.getAttribute('data-page');
-  if (page) {
-    navigateToPage(page, null);
-  }
+function requestProductList() {
+  socket.emit('requestFilteredProducts', { 
+    page: currentPage, 
+    category: currentCategory,
+    maxPrice: currentMaxPrice,
+    sortOrder: currentSortOrder
+  });
 }
 
 function applyFilters() {
@@ -112,16 +121,11 @@ function applyFilters() {
   requestProductList();
 }
 
-function requestProductList() {
-  socket.emit('requestProductList', { 
-    page: currentPage, 
-    category: currentCategory,
-    maxPrice: currentMaxPrice,
-    sortOrder: currentSortOrder
-  });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
+  const path = window.location.pathname;
+  const pathParts = path.split('/');
+  currentPage = parseInt(pathParts[pathParts.length - 1]) || 1;
+  currentCategory = pathParts[1] !== 'realtimeproducts' && pathParts[1] !== 'page' ? pathParts[1] : '';
   const productList = document.getElementById('product-list');
 
   if (productList) {

@@ -44,7 +44,10 @@ app.engine('handlebars', handlebars.engine({
           return (v1 >= v2) ? options.fn(this) : options.inverse(this);
         default:
           return options.inverse(this);
-      }
+      }      
+    },
+    eq: function (v1, v2) {
+      return v1 === v2;
     },
     formatPrice: function(price) {
       return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(price);
@@ -81,32 +84,32 @@ io.use(sharedSession(sessionMiddleware, {
 }));
 
 io.on('connection', (socket) => {
-  socket.on('requestProductList', async ({ page, category, maxPrice, sortOrder }) => {
+  socket.on('requestFilteredProducts', async (params) => {
     try {
       let query = {};
-      if (category) {
-        query.category = category;
+      if (params.category) {
+        query.category = params.category;
       }
-      if (maxPrice) {
-        query.price = { $lte: parseFloat(maxPrice) };
+      if (params.maxPrice) {
+        query.price = { $lte: parseFloat(params.maxPrice) };
       }
 
       let sort = {};
-      if (sortOrder === 'asc') {
+      if (params.sortOrder === 'asc') {
         sort = { price: 1 };
-      } else if (sortOrder === 'desc') {
+      } else if (params.sortOrder === 'desc') {
         sort = { price: -1 };
       }
 
       const products = await Product.paginate(query, { 
-        page, 
+        page: params.page || 1, 
         limit: 20,
         sort: sort
       });
-
       socket.emit('productListUpdate', products);
     } catch (error) {
-      console.error('Error loading products:', error);
+      console.error('Error al filtrar productos:', error);
+      socket.emit('error', { message: 'Error al filtrar productos' });
     }
   });
 });

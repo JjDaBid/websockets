@@ -48,7 +48,11 @@
                 </div>
                 {{/each}}        
             {{else}}
-                <p class="empty-cart-message">El carrito está vacío.</p>
+                <div class="empty-cart-container">
+                    <img class="cart-image" src="/img/carrito-de-compras.png" alt="Carrito de Compras" />
+                    <p class="empty-cart-message">Tu carrito está vacío.</p>
+                    <button class="btn-return" onclick="window.location.href='/'"> Ir a la tienda</button>
+                </div>
             {{/if}}
         </div>
 

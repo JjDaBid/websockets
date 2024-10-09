@@ -6,7 +6,6 @@ const viewsRouter = Router();
 
 viewsRouter.get('/', (req, res) => {
   res.redirect('/page/1');
-  console.log("entra a /home ")
 });
 
 viewsRouter.get('/page/:page', async (req, res) => {
@@ -24,7 +23,6 @@ viewsRouter.get('/page/:page', async (req, res) => {
         nextPage: products.nextPage
       }
     });
-    console.log("redirigido a home paginado")
   } catch (error) {
     console.error('Error loading products:', error);
     res.status(500).render('error', { message: 'Error al cargar los productos' });
@@ -33,8 +31,8 @@ viewsRouter.get('/page/:page', async (req, res) => {
 
 viewsRouter.get('/:category/page/:page', async (req, res) => {
   try {
-    const category = req.params.category;
     const page = parseInt(req.params.page, 10) || 1;
+    const category = req.query.category || '';
     const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice) : undefined;
     const sortOrder = req.query.sortOrder || '';
 
@@ -59,9 +57,13 @@ viewsRouter.get('/:category/page/:page', async (req, res) => {
       sort: sort
     });
 
-    res.status(200).render('layouts/home', { 
-      products: products.docs, 
-      category: category,
+    let productToEdit = {};
+    if (req.query.id) {
+      productToEdit = await Product.findById(req.query.id) || {};
+    }
+
+    res.status(200).render('layouts/Categories', {
+      products: products.docs,
       pagination: {
         page: products.page,
         totalPages: products.totalPages,
@@ -69,11 +71,17 @@ viewsRouter.get('/:category/page/:page', async (req, res) => {
         hasNextPage: products.hasNextPage,
         prevPage: products.prevPage,
         nextPage: products.nextPage
+      },
+      productToEdit,
+      filters: {
+        category,
+        maxPrice,
+        sortOrder
       }
     });
   } catch (error) {
-    console.error('Error loading products by category:', error);
-    res.status(500).render('error', { message: 'Error al cargar los productos por categoría' });
+    console.error('Error loading products:', error);
+    res.status(500).render('error', { message: 'Error al cargar los productos' });
   }
 });
 
@@ -87,7 +95,7 @@ viewsRouter.get('/product/:id', async (req, res) => {
     res.render('layouts/Product', { product: foundProduct });
   } catch (error) {
     console.error('Error loading product:', error);
-    res.status(500).json('error', { message: 'Error al cargar el producto' });
+    res.status(500).render('error', { message: 'Error al cargar el producto' });
   }
 });
 
