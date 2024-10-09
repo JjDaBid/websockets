@@ -84,20 +84,34 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function updateCartTotal() {
-      const cartItems = document.querySelectorAll('.cart-card');
-      let total = 0;
-      cartItems.forEach(item => {
-          const quantity = parseInt(item.querySelector('.quantity').textContent);
-          const price = parseFloat(item.querySelector('.price').textContent);
-          total += quantity * price;          
-      });
-      const cartTotalElement = document.querySelector('.cart-total');
-      if (cartTotalElement) {
-          cartTotalElement.textContent = `${total}`;
-      } else {
-          console.error('No se pudo encontrar el elemento .cart-total');
-      }
-  }
+    const cartItems = document.querySelectorAll('.cart-card');
+    let total = 0;
+    cartItems.forEach(item => {
+        const quantity = parseInt(item.querySelector('.quantity').textContent);
+        const price = parseFloat(item.querySelector('.price').textContent);
+        total += quantity * price;          
+    });
+    
+    const cartTotalElement = document.querySelector('.cart-total');
+    if (cartTotalElement) {
+        cartTotalElement.textContent = `${total}`;
+    } else {
+        console.error('No se pudo encontrar el elemento .cart-total');
+    }
+    const totalContainer = document.querySelector('.total-container');
+    if (total === 0) {
+        totalContainer.style.display = 'none';
+        cartContainer.innerHTML = `
+            <div class="empty-cart-container">
+                <img class="cart-image" src="/img/carrito-de-compras.png" alt="Carrito de Compras" />
+                <p class="empty-cart-message">Tu carrito está vacío.</p>
+                <button class="btn-return" onclick="window.location.href='/'"> Ir a la tienda</button>
+            </div>
+        `;
+    } else {
+        totalContainer.style.display = 'block';
+    }
+}
 
   const payButton = document.getElementById('payButton');
   if (payButton) {
@@ -145,46 +159,52 @@ document.addEventListener('DOMContentLoaded', function() {
   } 
 
   function clearCart() {
-      const cartItems = document.querySelectorAll('.cart-card');
-      const productIds = Array.from(cartItems).map(item => item.dataset.id); 
-      fetch('/api/carts/removeAll', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ ids: productIds })
-      })
-      .then(response => {
-          if (!response.ok) {
-              return response.json().then(err => { throw new Error(err.error || 'Error desconocido al eliminar los productos del carrito') });
-          }
-          return response.json();
-      })
-      .then(data => {
-          const cartContainer = document.querySelector('.cart-container');
-          const emptyCartMessage = document.createElement('p');
-          emptyCartMessage.textContent = 'El carrito está vacío.';
-          emptyCartMessage.className = 'empty-cart-message';
-          while (cartContainer.firstChild) {
-              cartContainer.removeChild(cartContainer.firstChild);
-          }
-          cartContainer.appendChild(emptyCartMessage);
-          const cartTotalElement = document.querySelector('.cart-total');
-          if (cartTotalElement) {
-              cartTotalElement.textContent = '0';
-          }
-          const totalContainer = document.querySelector('.total-container');
-          if (totalContainer) {
-              totalContainer.style.display = 'none';
-          }
-          document.dispatchEvent(new CustomEvent('cartUpdated', { 
-              detail: { action: 'clear' }
-          }));
-      })
-      .catch(error => {
-          console.error('Error:', error);     
-      });
-  }
+    const cartItems = document.querySelectorAll('.cart-card');
+    const productIds = Array.from(cartItems).map(item => item.dataset.id);
+    fetch('/api/carts/removeAll', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ids: productIds })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.error || 'Error desconocido al eliminar los productos del carrito') });
+        }
+        return response.json();
+    })
+    .then(data => {
+        const cartContainer = document.querySelector('.cart-container');       
+
+        while (cartContainer.firstChild) {
+            cartContainer.removeChild(cartContainer.firstChild);
+        }
+
+        cartContainer.innerHTML = `
+            <div class="empty-cart-container">
+                <img class="cart-image" src="/img/carrito-de-compras.png" alt="Carrito de Compras" />
+                <p class="empty-cart-message">Tu carrito está vacío.</p>
+                <button class="btn-return" onclick="window.location.href='/'"> Ir a la tienda</button>
+            </div>
+        `;
+
+        const cartTotalElement = document.querySelector('.cart-total');
+        if (cartTotalElement) {
+            cartTotalElement.textContent = '0';
+        }
+        const totalContainer = document.querySelector('.total-container');
+        if (totalContainer) {
+            totalContainer.style.display = 'none';
+        }
+        document.dispatchEvent(new CustomEvent('cartUpdated', { 
+            detail: { action: 'clear' }
+        }));
+    })
+    .catch(error => {
+        console.error('Error:', error);     
+    });
+}
 
   function getCartData() {
       const cartItems = document.querySelectorAll('.cart-card');
