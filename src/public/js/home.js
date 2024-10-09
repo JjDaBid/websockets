@@ -118,7 +118,17 @@ function applyFilters() {
   currentMaxPrice = document.getElementById('filter-price').value;
   currentSortOrder = document.getElementById('sort-order').value;  
   currentPage = 1;
+  updateCategoryText();
   requestProductList();
+}
+
+function updateCategoryText() {
+  const category = document.getElementById('filter-category').value || 'Todas';
+  if (category === "Todas") {
+    document.getElementById('categoryText').textContent = `Sensualidad que abraza tu cuerpo, elegancia que define tu esencia.`;
+  } else {
+    document.getElementById('categoryText').textContent = `${category}`;
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

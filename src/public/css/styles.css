@@ -1,8 +1,43 @@
 
 main {
-    margin-top: 80px; 
-    padding: 0 20px;
+    margin-top: 60px; 
     font-family: 'Montserrat', sans-serif;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    background-color: yellowgreen;
+}
+
+.banner {
+    background-image: url('https://cdn-3.expansion.mx/dims4/default/0688bb1/2147483647/strip/true/crop/800x533+0+0/resize/600x400!/format/webp/quality/60/?url=https%3A%2F%2Fcherry-brightspot.s3.amazonaws.com%2Fdc%2F49%2F2077d7d5499b91d6b383e251858c%2Fmegan-fox-4.jpg');
+    background-size: cover;
+    background-position: center;
+    padding: 100px 20px;
+    width: 100%;
+    text-align: center;
+    color: white;
+}
+
+.banner-content {
+    background: rgba(0, 0, 0, 0.5);
+    width: 100%;
+}
+
+.banner-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 4rem;
+    font-weight: 700;
+    margin: 0;
+    color: white;
+}
+
+.banner-category {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5rem;
+    margin-top: 10px;
 }
 
 h1 {
@@ -223,6 +258,14 @@ input[type="number"]::-webkit-inner-spin-button {
 
 
 @media (max-width: 1200px) {
+    .banner-title {
+        font-size: 2.5rem;
+    }
+
+    .banner-category {
+        font-size: 1.2rem;
+    }
+
     .product-list {
         grid-template-columns: repeat(3, 1fr);
     }
@@ -235,6 +278,17 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 @media (max-width: 600px) {
+
+    .banner-title {
+        font-size: 2rem;
+    }
+
+    .banner-category {
+        font-size: 1rem;
+    }
+
+
+
     .product-list {
         grid-template-columns: 1fr;
     }
